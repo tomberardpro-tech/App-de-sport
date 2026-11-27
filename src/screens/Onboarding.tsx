@@ -15,16 +15,18 @@ export function Onboarding() {
   const setProfile = useStore((s) => s.setProfile);
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
-  const [goal, setGoal] = useState<Goal>('masse');
+  const [goalChoice, setGoal] = useState<Goal | null>(null);
+  const goal: Goal = goalChoice ?? 'maintien';
   const [weight, setWeight] = useState(72);
   const [height, setHeight] = useState(178);
   const [age, setAge] = useState(27);
   const [sex, setSex] = useState<Sex>('H');
-  const [count, setCount] = useState(4);
-  const [days, setDays] = useState([true, false, true, false, true, true, false]);
+  const [countChoice, setCount] = useState<number | null>(null);
+  const count = countChoice ?? 0;
+  const [days, setDays] = useState([false, false, false, false, false, false, false]);
 
   const picked = days.filter(Boolean).length;
-  const kcal = computeKcal({ weight, height, age, sex, sessionsPerWeek: count, goal });
+  const kcal = computeKcal({ weight, height, age, sex, sessionsPerWeek: count || 3, goal });
   const next = () => { haptic(); setStep((s) => s + 1); };
 
   const finish = () => {
@@ -66,7 +68,7 @@ export function Onboarding() {
           <Title light="Quel est" bold="ton objectif ?" sub="On adapte ta cible de calories en fonction." note={'tu pourras\nchanger d\'avis'} />
           <div className="stack">
             {GOALS.map((g) => {
-              const on = goal === g.id;
+              const on = goalChoice === g.id;
               return (
                 <button key={g.id} className="option press" aria-pressed={on} onClick={() => { haptic(); setGoal(g.id); }}>
                   <span className="tile"><Icon name={g.icon} /></span>
@@ -111,7 +113,7 @@ export function Onboarding() {
           <Title light="Combien de séances" bold="par semaine ?" sub="Un bon objectif, c'est celui qu'on tient." />
           <div className="row" style={{ gap: 8 }}>
             {[2, 3, 4, 5, 6].map((v) => (
-              <button key={v} className={`card num-btn ${v === count ? 'is-selected' : ''}`} style={{ flex: 1, height: 56, borderRadius: 'var(--r-control)', fontSize: 20, fontWeight: 600 }}
+              <button key={v} className={`card num-btn ${v === countChoice ? 'is-selected' : ''}`} style={{ flex: 1, height: 56, borderRadius: 'var(--r-control)', fontSize: 20, fontWeight: 600 }}
                 onClick={() => {
                   haptic(); setCount(v);
                   if (picked > v) { let extra = picked - v; setDays(days.slice().reverse().map((d) => (d && extra-- > 0 ? false : d)).reverse()); }
@@ -121,13 +123,13 @@ export function Onboarding() {
           <div className="stack" style={{ gap: 10, marginTop: 8 }}>
             <div className="between">
               <p className="item-title">Quels jours ?</p>
-              <span className="cap">{picked} / {count} choisis</span>
+              <span className="cap">{count ? `${picked} / ${count} choisis` : 'optionnel'}</span>
             </div>
             <div className="row" style={{ gap: 6 }}>
               {weekdayLetter.map((l, i) => (
                 <button key={i} className={`card day-btn ${days[i] ? 'is-selected' : ''}`} style={{ flex: 1, height: 44, borderRadius: 'var(--r-control)', fontSize: 13, fontWeight: 500 }}
                   onClick={() => {
-                    if (!days[i] && picked >= count) { haptic(30); return; }
+                    if (!days[i] && count && picked >= count) { haptic(30); return; }
                     haptic(); const n = days.slice(); n[i] = !n[i]; setDays(n);
                   }}>{l}</button>
               ))}
@@ -167,8 +169,9 @@ export function Onboarding() {
         {step === 1 && (
           <button className="btn" disabled={!name.trim()} onClick={next}>C'est parti <Icon name="chevron" size={16} stroke={2} /></button>
         )}
-        {step > 1 && step < 4 && <button className="btn" onClick={next}>Continuer</button>}
-        {step === 4 && <button className="btn" onClick={next}>Voir mon plan</button>}
+        {step === 2 && <button className="btn" disabled={!goalChoice} onClick={next}>Continuer</button>}
+        {step === 3 && <button className="btn" onClick={next}>Continuer</button>}
+        {step === 4 && <button className="btn" disabled={!countChoice} onClick={next}>Voir mon plan</button>}
         {step === 5 && <button className="btn" onClick={finish}>Découvrir mon tableau de bord</button>}
       </div>
     </div>
