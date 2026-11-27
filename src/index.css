@@ -85,6 +85,13 @@ a { color: inherit; }
 .card--dashed { background: transparent; border: 1px dashed var(--line-soft); }
 .list-row { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-4) var(--s-5); width: 100%; background: none; border: 0; text-align: left; }
 .list-row + .list-row { border-top: 1px solid var(--divider); }
+.option {
+  display: flex; align-items: center; gap: var(--s-4);
+  width: 100%; padding: var(--s-5); text-align: left;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card);
+}
+.option[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--placeholder); }
+.option[aria-pressed='true'] .tile { background: var(--surface); }
 .tile {
   width: 38px; height: 38px; flex-shrink: 0;
   border-radius: var(--r-control);

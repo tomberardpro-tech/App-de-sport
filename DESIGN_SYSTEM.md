@@ -47,6 +47,7 @@ Arrondi intérieur = arrondi extérieur − marge (ex. menu 12 px, marge 6 px �
 | `.btn` / `.btn--light` / `.btn--sm` | Bouton principal noir 52 px / secondaire blanc / petit |
 | `IconButton` (`.icb`) | Bouton icône carré 44 px (36 px en `small`) |
 | `.card`, `.card--list` + `.list-row` | Carte blanche ; liste dans une carte avec séparateurs |
+| `.option` | Carte de choix (objectif…) ; `aria-pressed="true"` = fond pêche + contour orange doux |
 | `.tile` | Vignette d'icône 38 px dans une ligne de liste |
 | `.badge` / `.badge--neutral` | Pastille orange douce / neutre |
 | `.chip` | Filtre ; `aria-pressed="true"` = noir |

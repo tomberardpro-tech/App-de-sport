@@ -68,9 +68,8 @@ export function Onboarding() {
             {GOALS.map((g) => {
               const on = goal === g.id;
               return (
-                <button key={g.id} className="card list-row press" aria-pressed={on} onClick={() => { haptic(); setGoal(g.id); }}
-                  style={{ padding: 14, background: on ? 'var(--accent-soft)' : undefined, borderColor: on ? 'var(--placeholder)' : undefined }}>
-                  <span className="tile" style={{ background: on ? 'var(--surface)' : undefined }}><Icon name={g.icon} /></span>
+                <button key={g.id} className="option press" aria-pressed={on} onClick={() => { haptic(); setGoal(g.id); }}>
+                  <span className="tile"><Icon name={g.icon} /></span>
                   <span className="grow"><span className="item-title" style={{ display: 'block', fontSize: 15 }}>{g.title}</span><span className="cap">{g.sub}</span></span>
                   <span style={{ width: 22, height: 22, borderRadius: '50%', border: `1.5px solid ${on ? 'var(--ink)' : 'var(--line-soft)'}`, background: on ? 'var(--ink)' : 'transparent', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all var(--d-base) var(--ease-out)' }}>
                     {on && <span className="pop" style={{ display: 'flex' }}><Icon name="check" size={12} stroke={3.5} /></span>}
