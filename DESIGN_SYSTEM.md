@@ -53,6 +53,7 @@ Arrondi intérieur = arrondi extérieur − marge (ex. menu 12 px, marge 6 px �
 | `.chip` | Filtre ; `aria-pressed="true"` = noir |
 | `Segmented` | Choix exclusif (Homme/Femme, Petit/Moyen/Grand) |
 | `Stepper` | − valeur + (poids, reps, âge…) |
+| `Ruler` | Règle graduée à faire glisser au doigt (taille), trait orange au centre |
 | `Steps` | Barre de progression de l'onboarding |
 | `Ring`, `LineChart` | Anneau des calories, courbe fine noire avec point orange |
 | `Sheet` | Tiroir du bas (rendu en portail au-dessus de tout) |

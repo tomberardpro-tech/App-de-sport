@@ -83,6 +83,50 @@ export function Stepper({ value, onChange, step = 1, min = 0, max = 999, unit, b
   );
 }
 
+/** Règle graduée qu'on fait glisser au doigt ; le trait orange au centre indique la valeur. */
+export function Ruler({ value, onChange, min, max, label }: { value: number; onChange: (v: number) => void; min: number; max: number; label: string }) {
+  const PX = 10; // pixels par unité
+  const drag = useRef<{ x: number; v: number } | null>(null);
+  const [offset, setOffset] = useState(0); // glissement fin entre deux graduations
+  const clamp = (v: number) => Math.min(max, Math.max(min, v));
+
+  const onDown = (e: React.PointerEvent) => {
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    drag.current = { x: e.clientX, v: value };
+  };
+  const onMove = (e: React.PointerEvent) => {
+    if (!drag.current) return;
+    const exact = drag.current.v + (drag.current.x - e.clientX) / PX;
+    const next = clamp(Math.round(exact));
+    setOffset(clamp(exact) === exact ? (exact - next) * PX : 0);
+    if (next !== value) { haptic(3); onChange(next); }
+  };
+  const onUp = () => { drag.current = null; setOffset(0); };
+
+  const ticks = [];
+  for (let i = -22; i <= 22; i++) {
+    const v = value + i;
+    if (v < min || v > max) continue;
+    const major = v % 5 === 0;
+    ticks.push(
+      <div key={v} style={{ position: 'absolute', bottom: 0, left: `calc(50% + ${i * PX - offset}px)`, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        {v % 10 === 0 && <span style={{ fontSize: 10, color: 'var(--muted)' }}>{v}</span>}
+        <div style={{ width: 1, height: major ? 14 : 8, background: major ? 'var(--muted)' : 'var(--line-soft)' }} />
+      </div>,
+    );
+  }
+  return (
+    <div role="slider" aria-label={label} aria-valuemin={min} aria-valuemax={max} aria-valuenow={value} tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'ArrowLeft') onChange(clamp(value - 1)); if (e.key === 'ArrowRight') onChange(clamp(value + 1)); }}
+      onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
+      style={{ position: 'relative', height: 44, touchAction: 'none', cursor: 'ew-resize', overflow: 'hidden',
+        WebkitMaskImage: 'linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent)', maskImage: 'linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent)' }}>
+      {ticks}
+      <div style={{ position: 'absolute', left: '50%', bottom: 0, width: 3, height: 26, marginLeft: -1.5, borderRadius: 2, background: 'var(--accent)' }} />
+    </div>
+  );
+}
+
 export function Segmented<T extends string>({ options, value, onChange }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
   return (
     <div className="seg">

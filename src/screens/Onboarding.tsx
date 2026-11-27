@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { IconButton, Segmented, Stepper, Steps, Title } from '../ds/components';
+import { IconButton, Ruler, Segmented, Stepper, Steps, Title } from '../ds/components';
 import { Icon, type IconName } from '../ds/Icon';
 import { useStore } from '../lib/store';
 import type { Goal, Sex } from '../lib/types';
@@ -91,11 +91,7 @@ export function Onboarding() {
           <div className="card" style={{ padding: '14px 16px' }}>
             <span className="cap">Taille</span>
             <Stepper big value={height} onChange={setHeight} min={120} max={230} unit="cm" />
-            <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-end', height: 24, gap: 0, marginTop: 10 }} aria-hidden="true">
-              {Array.from({ length: 31 }, (_, i) => (
-                <div key={i} style={i === 15 ? { width: 3, height: 24, borderRadius: 2, background: 'var(--accent)' } : { width: 1, height: i % 5 === 0 ? 14 : 8, background: i % 5 === 0 ? '#B9B4AA' : '#D9D5CC' }} />
-              ))}
-            </div>
+            <div style={{ marginTop: 8 }}><Ruler value={height} onChange={setHeight} min={120} max={230} label="Taille en centimètres" /></div>
           </div>
           <div className="grid2">
             <div className="card card--pad stack" style={{ gap: 8 }}>
