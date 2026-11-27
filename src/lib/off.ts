@@ -17,4 +17,3 @@ export async function fetchByBarcode(code: string): Promise<OffProduct | null> {
   };
 }
 
-export const canScan = () => typeof window !== 'undefined' && 'BarcodeDetector' in window;

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Bump, Empty, IconButton, Ring, Segmented, Sheet, Stepper } from '../ds/components';
 import { Icon, type IconName } from '../ds/Icon';
 import { useStore, useUi } from '../lib/store';
-import { canScan, fetchByBarcode, type OffProduct } from '../lib/off';
+import { fetchByBarcode, type OffProduct } from '../lib/off';
+import { createDetector, hasCamera } from '../lib/scanner';
 import { phraseOfDay } from '../lib/seed';
 import { kcalOfDay } from '../lib/stats';
 import type { Dish, DishItem, Food, MealKey } from '../lib/types';
@@ -222,6 +223,7 @@ function ScanSheet({ target, day, onClose }: { target: MealKey | 'library' | nul
   const [product, setProduct] = useState<OffProduct | null>(null);
   const [saved, setSaved] = useState<Food | null>(null);
   const [qty, setQty] = useState(100);
+  const [camera, setCamera] = useState<'starting' | 'on' | 'off'>('starting');
 
   const lookup = async (c: string) => {
     setStatus('loading');
@@ -232,27 +234,33 @@ function ScanSheet({ target, day, onClose }: { target: MealKey | 'library' | nul
   };
 
   useEffect(() => {
-    if (!target) { setProduct(null); setSaved(null); setCode(''); setStatus('idle'); return; }
-    if (!canScan() || product) return;
+    if (!target) { setProduct(null); setSaved(null); setCode(''); setStatus('idle'); setCamera('starting'); return; }
+    if (product) return;
+    if (!hasCamera()) { setCamera('off'); return; }
     let stream: MediaStream | null = null;
     let raf = 0;
     let stop = false;
     (async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        if (stop || !videoRef.current) return;
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+        if (stop || !videoRef.current) { stream.getTracks().forEach((t) => t.stop()); return; }
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
-        // @ts-expect-error BarcodeDetector n'est pas encore typé
-        const detector = new window.BarcodeDetector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
-        const tick = async () => {
+        setCamera('on');
+        const detector = await createDetector();
+        let last = 0;
+        const tick = async (t: number) => {
           if (stop || !videoRef.current) return;
-          const found = await detector.detect(videoRef.current).catch(() => []);
-          if (found[0]?.rawValue) { setCode(found[0].rawValue); lookup(found[0].rawValue); return; }
+          if (t - last > 150 && videoRef.current.readyState >= 2) { // ~7 analyses/s : fluide sans chauffer le téléphone
+            last = t;
+            const found = await detector.detect(videoRef.current).catch(() => []);
+            if (stop) return;
+            if (found[0]?.rawValue) { setCode(found[0].rawValue); lookup(found[0].rawValue); return; }
+          }
           raf = requestAnimationFrame(tick);
         };
-        tick();
-      } catch { /* caméra refusée : saisie manuelle */ }
+        raf = requestAnimationFrame(tick);
+      } catch { if (!stop) setCamera('off'); /* caméra refusée : saisie manuelle */ }
     })();
     return () => { stop = true; cancelAnimationFrame(raf); stream?.getTracks().forEach((t) => t.stop()); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -283,15 +291,17 @@ function ScanSheet({ target, day, onClose }: { target: MealKey | 'library' | nul
           }} />
       ) : (
         <>
-          {canScan() ? (
-            <div className="photo" style={{ height: 200, position: 'relative', background: 'var(--ink)' }}>
+          {camera !== 'off' ? (
+            <div className="photo" style={{ height: 220, position: 'relative', background: 'var(--ink)' }}>
               <video ref={videoRef} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               <div style={{ position: 'absolute', left: '15%', right: '15%', top: '50%', height: 2, background: 'var(--accent)', boxShadow: '0 0 12px var(--accent)', animation: 'scan 1.6s ease-in-out infinite alternate' }} />
               <style>{'@keyframes scan { from { transform: translateY(-50px); } to { transform: translateY(50px); } }'}</style>
+              {camera === 'starting' && <span className="cap" style={{ position: 'absolute', color: '#fff' }}>Ouverture de la caméra…</span>}
             </div>
           ) : (
-            <p className="sub" style={{ margin: 0 }}>Ton navigateur ne sait pas lire les codes-barres avec la caméra. Tape les chiffres sous le code.</p>
+            <p className="sub" style={{ margin: 0 }}>Caméra indisponible (autorise-la dans les réglages du navigateur). Tu peux taper les chiffres sous le code.</p>
           )}
+          {camera === 'on' && <span className="cap" style={{ textAlign: 'center' }}>Place le code-barres dans le cadre</span>}
           <div className="row">
             <input className="input" inputMode="numeric" placeholder="Code-barres (ex. 3017620422003)" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
             <IconButton icon="search" label="Chercher" onClick={() => code.length >= 8 && lookup(code)} />
