@@ -69,7 +69,7 @@ export function Machines({ nav }: { nav: Nav }) {
       <label className="card row" style={{ height: 44, padding: '0 14px', gap: 10, borderRadius: 'var(--r-control)' }}>
         <span style={{ color: 'var(--muted)', display: 'flex' }}><Icon name="search" size={18} /></span>
         <input type="search" aria-label="Rechercher une machine" placeholder="Rechercher…" value={q} onChange={(e) => setQ(e.target.value)}
-          style={{ border: 0, outline: 'none', flex: 1, background: 'transparent', fontSize: 14 }} />
+          style={{ border: 0, outline: 'none', flex: 1, background: 'transparent', fontSize: 16 }} />
       </label>
 
       <div className="hscroll">
@@ -141,7 +141,7 @@ function AddMachineSheet({ open, onClose, onCreated }: { open: boolean; onClose:
     <Sheet open={open} onClose={onClose} title="Nouvelle machine">
       <label className="photo press" style={{ height: 140, cursor: 'pointer', flexDirection: 'column', gap: 6 }}>
         {photo ? <img src={photo} alt="Aperçu" /> : <><Icon name="camera" size={26} /><span className="cap" style={{ color: 'var(--accent-ink)' }}>Ajouter une photo</span></>}
-        <input type="file" accept="image/*" capture="environment" hidden onChange={async (e) => { const f = e.target.files?.[0]; if (f) setPhoto(await readPhoto(f)); }} />
+        <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; if (f) setPhoto(await readPhoto(f)); }} />
       </label>
       <input className="input" placeholder="Nom de la machine" value={name} onChange={(e) => setName(e.target.value)} />
       <div className="row" style={{ flexWrap: 'wrap', gap: 8 }}>

@@ -2,8 +2,14 @@ import type { Food, Goal, Sex } from './types';
 
 export const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 
+/** « AAAA-MM-JJ » → Date locale à minuit (new Date('AAAA-MM-JJ') serait en UTC). */
+export const parseDay = (k: string) => {
+  const [y, m, d] = k.slice(0, 10).split('-').map(Number);
+  return new Date(y, m - 1, d);
+};
+
 export const dayKey = (d: Date | string = new Date()) => {
-  const x = typeof d === 'string' ? new Date(d) : d;
+  const x = typeof d === 'string' ? (d.length === 10 ? parseDay(d) : new Date(d)) : d;
   return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
 };
 
@@ -28,8 +34,8 @@ export const weekdayShort = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 export const weekdayLetter = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
 export const relativeDay = (iso: string) => {
-  const today = new Date(dayKey());
-  const d = new Date(dayKey(iso));
+  const today = parseDay(dayKey());
+  const d = parseDay(dayKey(iso));
   const diff = Math.round((today.getTime() - d.getTime()) / 86400000);
   if (diff <= 0) return "aujourd'hui";
   if (diff === 1) return 'hier';

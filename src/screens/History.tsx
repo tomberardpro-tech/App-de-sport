@@ -3,7 +3,7 @@ import { Empty, LineChart, Sheet, Stepper } from '../ds/components';
 import { Icon } from '../ds/Icon';
 import { useStore, useUi } from '../lib/store';
 import { weekDone } from '../lib/stats';
-import { dayKey, fmt, haptic, weekdayLetter } from '../lib/utils';
+import { dayKey, fmt, haptic, weekdayLetter , parseDay } from '../lib/utils';
 import type { Nav } from '../App';
 
 export function History({ nav }: { nav: Nav }) {
@@ -53,7 +53,7 @@ export function History({ nav }: { nav: Nav }) {
             return (
               <div key={day} className="card card--list">
                 <div className="list-row" style={{ justifyContent: 'space-between' }}>
-                  <span className="item-title">{new Date(day).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                  <span className="item-title">{parseDay(day).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
                   <span className="badge">{fmt(vol)} kg</span>
                 </div>
                 {ids.map((id) => {

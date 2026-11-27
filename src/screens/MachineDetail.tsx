@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { IconButton, LineChart, Sheet, Stepper } from '../ds/components';
+import { Fixed, IconButton, LineChart, Sheet, Stepper } from '../ds/components';
 import { Icon } from '../ds/Icon';
 import { useStore, useUi } from '../lib/store';
 import { machineStats } from '../lib/stats';
-import { dayKey, fmt, haptic } from '../lib/utils';
+import { dayKey, fmt, haptic , parseDay } from '../lib/utils';
 import { readPhoto } from './Machines';
 
 export function MachineDetail({ id, onBack }: { id: string; onBack: () => void }) {
@@ -36,7 +36,7 @@ export function MachineDetail({ id, onBack }: { id: string; onBack: () => void }
     haptic(); setWeight(ref.weight); setReps(ref.reps);
   };
 
-  const dayLabel = (k: string) => new Date(k).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+  const dayLabel = (k: string) => parseDay(k).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
 
   return (
     <div className="page screen-enter" style={{ paddingBottom: 320 }}>
@@ -51,7 +51,7 @@ export function MachineDetail({ id, onBack }: { id: string; onBack: () => void }
 
       <label className="photo press" style={{ height: 160, cursor: 'pointer', flexDirection: 'column', gap: 6 }}>
         {m.photo ? <img src={m.photo} alt={m.name} /> : <><Icon name="camera" size={30} stroke={1.4} /><span className="cap" style={{ color: 'var(--accent-ink)' }}>Ajouter ta photo</span></>}
-        <input type="file" accept="image/*" capture="environment" hidden onChange={async (e) => { const f = e.target.files?.[0]; if (f) updateMachine(id, { photo: await readPhoto(f) }); }} />
+        <input type="file" accept="image/*" hidden onChange={async (e) => { const f = e.target.files?.[0]; if (f) updateMachine(id, { photo: await readPhoto(f) }); }} />
       </label>
 
       <div>
@@ -119,6 +119,7 @@ export function MachineDetail({ id, onBack }: { id: string; onBack: () => void }
       <button className="link" style={{ alignSelf: 'center', color: 'var(--danger)' }} onClick={() => setConfirmDelete(true)}>Supprimer cette machine</button>
 
       {/* Saisie rapide d'une série */}
+      <Fixed>
       <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', zIndex: 10 }}>
         <div className="sheet" style={{ animation: 'none', boxShadow: '0 -8px 24px rgba(40,30,20,.06)', borderTop: '1px solid var(--border)', gap: 14 }}>
           <div className="sheet-handle" />
@@ -138,6 +139,7 @@ export function MachineDetail({ id, onBack }: { id: string; onBack: () => void }
           <button className="btn" onClick={add}>Ajouter la série</button>
         </div>
       </div>
+      </Fixed>
 
       <Sheet open={editSettings} onClose={() => setEditSettings(false)} title="Mes réglages">
         <textarea className="input" rows={3} style={{ height: 'auto', padding: 14, resize: 'none', fontFamily: 'var(--font-note)', fontSize: 20 }}

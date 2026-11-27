@@ -57,18 +57,18 @@ export function Home({ nav }: { nav: Nav }) {
 function SortableWidget({ w, selected, onSelect, onRemove }: { w: Widget; selected: boolean; onSelect: () => void; onRemove: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: w.type });
   return (
-    <div ref={setNodeRef} className={isDragging ? '' : 'wiggle'}
+    <div ref={setNodeRef}
       style={{
         gridColumn: span(w.size), position: 'relative',
         transform: CSS.Transform.toString(transform), transition,
         zIndex: isDragging ? 5 : 1,
       }}>
       <div {...attributes} {...listeners} onClick={onSelect}
-        className="card stack"
+        className={`card stack ${isDragging ? '' : 'wiggle'}`}
         style={{
-          padding: 14, gap: 8, minHeight: w.size === 'L' ? 120 : 84, touchAction: 'none', cursor: 'grab',
+          padding: 14, gap: 8, minHeight: w.size === 'L' ? 120 : 84, touchAction: 'manipulation', cursor: 'grab',
           borderStyle: selected ? 'solid' : 'dashed', borderColor: selected ? 'var(--ink)' : 'var(--line-soft)',
-          boxShadow: isDragging ? '0 16px 30px rgba(40,30,20,.14)' : 'none', transform: isDragging ? 'scale(1.03)' : undefined,
+          boxShadow: isDragging ? '0 16px 30px rgba(40,30,20,.14)' : 'none',
           transition: 'box-shadow var(--d-base), transform var(--d-base)',
         }}>
         <div className="between" style={{ alignItems: 'center' }}>
@@ -100,7 +100,7 @@ function EditHome({ onDone }: { onDone: () => void }) {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 

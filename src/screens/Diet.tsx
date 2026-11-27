@@ -6,7 +6,7 @@ import { canScan, fetchByBarcode, type OffProduct } from '../lib/off';
 import { phraseOfDay } from '../lib/seed';
 import { kcalOfDay } from '../lib/stats';
 import type { Dish, DishItem, Food, MealKey } from '../lib/types';
-import { addDays, dayKey, fmt, foodKcal, haptic, startOfWeek, unitLabel, weekdayShort } from '../lib/utils';
+import { addDays, dayKey, fmt, foodKcal, haptic, startOfWeek, unitLabel, weekdayShort , parseDay } from '../lib/utils';
 
 const MEALS: { key: MealKey; label: string; icon: IconName }[] = [
   { key: 'petitdej', label: 'Petit-déjeuner', icon: 'sun' },
@@ -33,14 +33,14 @@ export function Diet() {
 
   const target = profile!.kcalTarget;
   const eaten = kcalOfDay(meals, day);
-  const mon = startOfWeek(new Date(day));
+  const mon = startOfWeek(parseDay(day));
   const dayMeals = meals.filter((m) => m.date === day);
   const isToday = day === dayKey();
 
   return (
     <div className="page screen-enter">
       <div className="between" style={{ alignItems: 'flex-start' }}>
-        <h1 className="title">Ma diète,<br /><b>{isToday ? "aujourd'hui" : new Date(day).toLocaleDateString('fr-FR', { weekday: 'long' })}</b></h1>
+        <h1 className="title">Ma diète,<br /><b>{isToday ? "aujourd'hui" : parseDay(day).toLocaleDateString('fr-FR', { weekday: 'long' })}</b></h1>
         <p className="note note--right" style={{ marginTop: 6 }}>{phraseOfDay(9)}</p>
       </div>
 

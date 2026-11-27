@@ -68,7 +68,7 @@ Arrondi intérieur = arrondi extérieur − marge (ex. menu 12 px, marge 6 px �
 
 ## Mouvement et micro-interactions
 
-Durées et courbes : `--d-fast` 120 ms, `--d-base` 220 ms, `--d-slow` 420 ms, `--ease-out`, `--ease-spring`.
+Durées et courbes : `--d-fast` 80 ms, `--d-base` 160 ms, `--d-slow` 260 ms (courtes : l’app doit rester vive), `--ease-out`, `--ease-spring`.
 
 | Classe / outil | Effet |
 |---|---|
@@ -87,3 +87,11 @@ Durées et courbes : `--d-fast` 120 ms, `--d-base` 220 ms, `--d-slow` 420 ms, `-
 - Marges latérales 22 px (`--page-x`), espace vertical 18 px entre blocs, 12 px dans une grille.
 - Grille de widgets sur 2 colonnes : petit = 1 colonne, moyen = 2 colonnes, grand = 2 colonnes et plus haut.
 - Zone tactile minimale : 44 px.
+
+## Comportement « app native »
+
+- Pas de zoom (pincement, double-tap, focus d'un champ) : viewport bloqué, `touch-action: manipulation`, champs en 16 px minimum.
+- Pas de sélection de texte ni de menu « copier » à l'appui long, sauf dans les champs de saisie.
+- Les éléments fixés à l'écran (barre de saisie, tiroirs) passent par `Fixed` / `Sheet` (portail) pour ne pas bouger avec l'animation d'entrée.
+- Un tiroir ouvert bloque le défilement de la page derrière.
+- Les boutons − / + accélèrent quand on reste appuyé.

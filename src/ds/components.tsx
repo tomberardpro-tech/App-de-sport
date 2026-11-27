@@ -24,9 +24,27 @@ export function SectionHead({ title, action, onAction }: { title: string; action
   );
 }
 
-export function IconButton({ icon, label, onClick, small, className = '' }: { icon: IconName; label: string; onClick?: () => void; small?: boolean; className?: string }) {
+export function IconButton({ icon, label, onClick, small, className = '', repeat }: { icon: IconName; label: string; onClick?: () => void; small?: boolean; className?: string; repeat?: boolean }) {
+  const timer = useRef<number | undefined>(undefined);
+  const fired = useRef(false);
+  const latest = useRef(onClick);
+  latest.current = onClick;
+  const stop = () => { window.clearTimeout(timer.current); window.clearInterval(timer.current); };
+  useEffect(() => stop, []);
+  const holdProps = repeat ? {
+    onPointerDown: () => {
+      fired.current = false;
+      timer.current = window.setTimeout(() => {
+        fired.current = true;
+        timer.current = window.setInterval(() => { latest.current?.(); haptic(4); }, 90);
+      }, 420);
+    },
+    onPointerUp: stop, onPointerLeave: stop, onPointerCancel: stop,
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
+  } : {};
   return (
-    <button className={`icb ${small ? 'icb--sm' : ''} ${className}`} aria-label={label} onClick={() => { haptic(); onClick?.(); }}>
+    <button className={`icb ${small ? 'icb--sm' : ''} ${className}`} aria-label={label} {...holdProps}
+      onClick={() => { if (fired.current) { fired.current = false; return; } haptic(); onClick?.(); }}>
       <Icon name={icon} size={small ? 16 : 18} stroke={2} />
     </button>
   );
@@ -46,15 +64,21 @@ export function Bump({ value, children }: { value: unknown; children: ReactNode 
 export function Stepper({ value, onChange, step = 1, min = 0, max = 999, unit, big, decimals = 0 }: {
   value: number; onChange: (v: number) => void; step?: number; min?: number; max?: number; unit?: string; big?: boolean; decimals?: number;
 }) {
-  const set = (v: number) => onChange(Math.min(max, Math.max(min, Math.round(v * 100) / 100)));
+  const valueRef = useRef(value);
+  valueRef.current = value;
+  const set = (v: number) => {
+    const next = Math.min(max, Math.max(min, Math.round(v * 100) / 100));
+    valueRef.current = next;
+    onChange(next);
+  };
   return (
     <div className="row" style={{ justifyContent: 'space-between' }}>
-      <IconButton icon="minus" label="Moins" small={!big} onClick={() => set(value - step)} />
+      <IconButton icon="minus" label="Moins" small={!big} repeat onClick={() => set(valueRef.current - step)} />
       <p className={`value ${big ? 'value--big' : ''}`} style={{ margin: 0, whiteSpace: 'nowrap' }}>
         <Bump value={value}>{value.toLocaleString('fr-FR', { maximumFractionDigits: decimals })}</Bump>
         {unit && <span className="unit"> {unit}</span>}
       </p>
-      <IconButton icon="plus" label="Plus" small={!big} onClick={() => set(value + step)} />
+      <IconButton icon="plus" label="Plus" small={!big} repeat onClick={() => set(valueRef.current + step)} />
     </div>
   );
 }
@@ -80,9 +104,10 @@ export function Steps({ total, current, done }: { total: number; current: number
 export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title?: string; children: ReactNode }) {
   useEffect(() => {
     if (!open) return;
+    document.body.classList.add('sheet-open');
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); document.body.classList.remove('sheet-open'); };
   }, [open, onClose]);
   if (!open) return null;
   // Portail : le tiroir passe toujours au-dessus du menu et des animations d'écran.
@@ -134,7 +159,7 @@ export function LineChart({ values, height = 64, empty }: { values: number[]; he
     <svg width="100%" height={height} viewBox={`0 0 ${w} ${height}`} preserveAspectRatio="none" fill="none" aria-hidden="true">
       <path d={`M0 ${height * 0.25} H${w} M0 ${height * 0.62} H${w}`} stroke="var(--divider)" strokeWidth="1" />
       <path d={d} stroke="var(--ink)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke"
-        style={{ strokeDasharray: 1000, strokeDashoffset: 1000, animation: 'draw 900ms var(--ease-out) forwards' }} />
+        style={{ strokeDasharray: 1000, strokeDashoffset: 1000, animation: 'draw 600ms var(--ease-out) forwards' }} />
       <circle cx={lx} cy={ly} r="3.5" fill="var(--accent)" className="pop" />
       <style>{'@keyframes draw { to { stroke-dashoffset: 0; } }'}</style>
     </svg>
@@ -184,6 +209,11 @@ export function Toaster() {
       {toast && <div className="toast" role="status"><Icon name="check" size={16} stroke={2.4} />{toast}</div>}
     </>
   );
+}
+
+/** Élément fixé à l'écran, rendu hors de l'écran animé (sinon il bouge avec l'animation d'entrée). */
+export function Fixed({ children }: { children: ReactNode }) {
+  return createPortal(children, document.body);
 }
 
 export function Empty({ children }: { children: ReactNode }) {

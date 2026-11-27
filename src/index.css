@@ -6,6 +6,11 @@
 
 html, body, #root { height: 100%; }
 
+html {
+  touch-action: manipulation;       /* pas de zoom au double-tap */
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -13,7 +18,15 @@ body {
   font-family: var(--font);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;      /* pas d'effet élastique qui recharge la page */
+  overflow-x: clip;
 }
+body.sheet-open { overflow: hidden; }
+
+/* Comme une app native : pas de sélection de texte ni de menu « copier » à l'appui long */
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input, textarea { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+img { -webkit-user-drag: none; }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
@@ -108,7 +121,7 @@ a { color: inherit; }
   padding: 0 16px;
   background: var(--surface);
   border: 1px solid var(--border); border-radius: var(--r-control);
-  font-size: 15px; outline: none;
+  font-size: 16px; outline: none; /* 16 px : iOS ne zoome pas au focus */
 }
 .input:focus { border-color: var(--ink); }
 
@@ -166,7 +179,7 @@ a { color: inherit; }
 /* ---------- Tiroir ---------- */
 .sheet-backdrop { position: fixed; inset: 0; background: rgba(28, 28, 26, 0.3); z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
 .sheet {
-  width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto;
+  width: 100%; max-width: 480px; max-height: 88vh; max-height: 88dvh; overflow-y: auto; overscroll-behavior: contain;
   background: var(--surface);
   border-radius: var(--r-sheet) var(--r-sheet) 0 0;
   padding: 12px var(--page-x) calc(env(safe-area-inset-bottom) + 24px);
@@ -183,19 +196,18 @@ a { color: inherit; }
 .btn:active:not(:disabled), .icb:active, .chip:active, .seg button:active, .nav button:active, .press:active, .day-btn:active, .num-btn:active { transform: scale(0.95); }
 .list-row:active { background: var(--bg); }
 
-.screen-enter { animation: screenIn var(--d-slow) var(--ease-out) both; }
-@keyframes screenIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.screen-enter { animation: screenIn var(--d-base) var(--ease-out) both; }
+@keyframes screenIn { from { opacity: 0.4; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 .stagger > * { animation: screenIn var(--d-slow) var(--ease-out) both; }
-.stagger > *:nth-child(2) { animation-delay: 40ms; }
-.stagger > *:nth-child(3) { animation-delay: 80ms; }
-.stagger > *:nth-child(4) { animation-delay: 120ms; }
-.stagger > *:nth-child(5) { animation-delay: 160ms; }
-.stagger > *:nth-child(6) { animation-delay: 200ms; }
-.stagger > *:nth-child(n+7) { animation-delay: 240ms; }
+.stagger > *:nth-child(2) { animation-delay: 20ms; }
+.stagger > *:nth-child(3) { animation-delay: 40ms; }
+.stagger > *:nth-child(4) { animation-delay: 60ms; }
+.stagger > *:nth-child(n+5) { animation-delay: 80ms; }
 
 .sheet-backdrop { animation: fadeIn var(--d-base) var(--ease-out) both; }
 .sheet { animation: sheetUp var(--d-slow) var(--ease-out) both; }
+.sheet-backdrop, .sheet { touch-action: manipulation; }
 @keyframes fadeIn { from { opacity: 0; } }
 @keyframes sheetUp { from { transform: translateY(100%); } }
 
